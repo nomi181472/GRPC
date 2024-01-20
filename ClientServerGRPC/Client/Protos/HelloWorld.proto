@@ -1,0 +1,14 @@
+//filename="HelloWord.proto"
+syntax="proto3";
+
+package HelloWord;
+
+message HelloRequest {
+ string Name=1;
+}
+message HelloResponse{
+string Description=1;
+}
+service HelloService{
+rpc SayHello(HelloRequest) returns (HelloResponse);
+}

@@ -1,0 +1,25 @@
+syntax="proto3";
+package GuessNumber;
+
+
+message PlayGame{
+	string Name=1;
+	int32 Number=2;
+	bool IsJoinedRequest=3;
+}
+
+
+message GameSync{
+
+	string Report=1;
+	bool Start=2;
+	bool Exit=3;
+	int32 Min=4;
+	int32 Max=5;
+
+}
+
+service GuessGameService{
+	rpc Play(stream PlayGame) returns (stream GameSync);
+}
+

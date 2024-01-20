@@ -1,0 +1,16 @@
+syntax="proto3";
+//defined namespace
+package ServerStreaming;
+
+
+message ShortParagraphRequest{
+	string Sentence=1;
+}
+
+message ShortParagraphResponse{
+	string Line=1;
+}
+
+service ServerStreamingService{
+	rpc GetParagraphs(ShortParagraphRequest) returns (stream ShortParagraphResponse);
+}
