@@ -1,3 +1,4 @@
+//GuessNumber.proto
 syntax="proto3";
 package GuessNumber;
 

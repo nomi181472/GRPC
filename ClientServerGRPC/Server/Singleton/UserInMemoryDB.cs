@@ -1,10 +1,6 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using System;
+﻿//UsersInMemoryDB.cs
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Server.Singleton
 {
@@ -22,6 +18,7 @@ namespace Server.Singleton
      
         public event Action<string>? ItemAdded;
         public event Action? AllUsersJoined;
+
         int totalUsers = 0;
         private UserInMemoryDB()
         {

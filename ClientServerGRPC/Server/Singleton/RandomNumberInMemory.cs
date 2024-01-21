@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
+//RandomNumberInMemory
 namespace Server.Singleton
 {
-    public class RandomN
+    public class GuessedNumberDetail
     {
         public  int guessedNumber = 0;
         public bool isSomeOneGuess=false;
@@ -14,7 +10,7 @@ namespace Server.Singleton
     public class RandomNumberInMemory
     {
         private static RandomNumberInMemory _instance;
-        static RandomN random = new RandomN();
+        static GuessedNumberDetail numDetail = new GuessedNumberDetail();
         public event Action<string> NumberGuess;
 
         private RandomNumberInMemory()
@@ -23,7 +19,7 @@ namespace Server.Singleton
         }
         public   int GetGuessNumber()
         {
-            return random.guessedNumber;
+            return numDetail.guessedNumber;
         }
         public static RandomNumberInMemory GetInstance()
         {
@@ -38,13 +34,13 @@ namespace Server.Singleton
         }
         public void GuessNumber(int min,int max)
         {
-            lock (random)
+            lock (numDetail)
             {
-                if (random.guessedNumber==0)
+                if (numDetail.guessedNumber==0)
                 {
                     Random rand = new Random();
-                    random.guessedNumber = rand.Next(min, max);
-                    Console.WriteLine($"Server has guessed :{random.guessedNumber}");
+                    numDetail.guessedNumber = rand.Next(min, max);
+                    Console.WriteLine($"Server has guessed :{numDetail.guessedNumber}");
                 }
                
 
@@ -52,11 +48,11 @@ namespace Server.Singleton
         }
         public bool IsNumberMatch(string name,int number)
         {
-            lock(random)
+            lock(numDetail)
             {
-                if(random.isSomeOneGuess==false && random.guessedNumber == number)
+                if(numDetail.isSomeOneGuess==false && numDetail.guessedNumber == number)
                 {
-                    random.isSomeOneGuess = true;
+                    numDetail.isSomeOneGuess = true;
                     OnNumberGuessed(name);
                     Console.WriteLine($"{name} is winner");
                     return true;
@@ -66,8 +62,6 @@ namespace Server.Singleton
 
             }
         }
-
-
         private void OnNumberGuessed(string name)
         {
             NumberGuess?.Invoke(name);

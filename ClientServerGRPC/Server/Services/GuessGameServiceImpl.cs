@@ -1,18 +1,19 @@
-﻿using Google.Protobuf;
+﻿
 using Grpc.Core;
 using GuessNumber;
 using Server.Singleton;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Server.Services
 {
     public class GuessGameServiceImpl: GuessGameService.GuessGameServiceBase
         
     {
+        
+        int min = 10;
+        int max = 20;
+        int trials = 5;
+        int totalPlayers = 3;
         public GuessGameServiceImpl()
         {
             UserInMemoryDB.SetInstance();
@@ -21,18 +22,14 @@ namespace Server.Services
         public override async Task Play(IAsyncStreamReader<PlayGame> requestStream, IServerStreamWriter<GameSync> responseStream, ServerCallContext context)
         {
 
-            Random rand = new Random();
-            int min = 10;
-            int max = 20;
-            int trials = 5;
-            int totalPlayers = 4;
+           
 
            
             UserInMemoryDB.GetInstance().SetTotalUsers(totalPlayers);
-            // Subscribe to the event // obervable pattern can also be use here.
-            SubcribeOnUserListUpdated(requestStream, responseStream, min, max, totalPlayers);
-            SubscribeOnAllUsersJoined(responseStream, min, max);
-            SubscribeOnUserGuessTheNumber(requestStream, responseStream, min, max);
+            // Subscribe to the event // obeservable pattern can also be use here.
+            SubcribeOnUserListUpdated(requestStream, responseStream, min, max, totalPlayers); //notify to all clients if some members join the game
+            SubscribeOnAllUsersJoined(responseStream, min, max); //notify to clients if all players joined
+            SubscribeOnUserGuessTheNumber(requestStream, responseStream, min, max);//notify to all clients if someone win the game.
 
             while (await requestStream.MoveNext())
             {
@@ -136,8 +133,8 @@ namespace Server.Services
                 {
                     Start = true,
                     Exit = false,
-                    Max = 1,
-                    Min = 0,
+                    Max = max,
+                    Min = min,
                     Report = "Game has been started",
                     
                 });
@@ -156,8 +153,8 @@ namespace Server.Services
                     {
                         Start = false,
                         Exit = false,
-                        Max = 1,
-                        Min = 0,
+                        Max = max,
+                        Min = min,
                         Report = $"{key} has joined the game. Members:{UserInMemoryDB.GetInstance().GetLength()}/{totalPlayers}",
                        
                     });

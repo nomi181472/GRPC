@@ -33,43 +33,13 @@ internal class Program
                 Console.WriteLine($"Client: {name} Connected to server");
 
                 var client = new GuessGameService.GuessGameServiceClient(channel);
-                var duplex = client.Play();
-                var _ = Task.Run(async () =>
-                {
-                    while (await duplex.ResponseStream.MoveNext())
-                    {
-                        Thread.Sleep(1000);
-                        if (!String.IsNullOrEmpty(duplex.ResponseStream.Current.Report))
-                        {
-                            Console.WriteLine(duplex.ResponseStream.Current.Report);
-                        }
+                var fullDuplex = client.Play(); // we get bidrectional stream
+                //duplex.RequestStream is used to request to server
+                //duplex.ResponseStream recieve stream from server
 
-                        if (duplex.ResponseStream.Current.Exit)
-                        {
-                            await duplex.RequestStream.CompleteAsync();
-                            break;
-                        }
-                        else if (duplex.ResponseStream.Current.Start)
-                        {
-                            int number = rand.Next(duplex.ResponseStream.Current.Min, duplex.ResponseStream.Current.Max);
-                            Console.WriteLine($"{name} guessed {number}");
-                            await duplex.RequestStream.WriteAsync(new PlayGame()
-                            {
-                                Name = name,
-                                Number = number,
-                                IsJoinedRequest = false
-                            });
-                        }
+                HandleServerStreamining(rand, name, fullDuplex);
 
-
-
-
-
-
-                    }
-                });
-
-                await duplex.RequestStream.WriteAsync(new PlayGame()
+                await fullDuplex.RequestStream.WriteAsync(new PlayGame()
                 {
                     Name = name,
                     Number = 0,
@@ -95,6 +65,42 @@ internal class Program
             }
         }
     }
+
+    private static void HandleServerStreamining(Random rand, string name, AsyncDuplexStreamingCall<PlayGame, GameSync> duplex)
+    {
+        var _ = Task.Run(async () =>
+        {
+            while (await duplex.ResponseStream.MoveNext())
+            {
+
+                if (!String.IsNullOrEmpty(duplex.ResponseStream.Current.Report))
+                {
+                    Console.WriteLine(duplex.ResponseStream.Current.Report);
+                }
+
+                if (duplex.ResponseStream.Current.Exit)
+                {
+                    await duplex.RequestStream.CompleteAsync();
+                    break;
+                }
+                else if (duplex.ResponseStream.Current.Start)
+                {
+                    Thread.Sleep(500);
+
+                    int number = rand.Next(duplex.ResponseStream.Current.Min, duplex.ResponseStream.Current.Max);
+                    Console.WriteLine($"{name} guessed {number}");
+
+                    await duplex.RequestStream.WriteAsync(new PlayGame()
+                    {
+                        Name = name,
+                        Number = number,
+                        IsJoinedRequest = false
+                    });
+                }
+            }
+        });
+    }
+
     static async Task ServerSideStreaming()
     {
         int port = 5555;
