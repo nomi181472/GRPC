@@ -1,0 +1,44 @@
+syntax="proto3";
+package UserGRPC;
+
+message LoginRequest{
+	string email=1;
+	string password=2;
+}
+message RegistrationRequest{
+	string email=1;
+	string name=2;
+	string password=3;
+}
+
+message LoginResponse{
+	int32 statusCode=1;
+	bool success=2;
+	string token=3;
+}
+message RegistrationResponse{
+	int32 statusCode=1;
+	bool success=2;
+	string token=3;
+}
+message Dummy{
+
+}
+message UserResponse{
+	string email=1;
+	string name=2;
+	string password=3;
+	string id=4;
+}
+message UsersResponse{
+	repeated UserResponse  userList=1;
+}
+service UserService{
+	rpc Login(LoginRequest) returns (LoginResponse);
+	rpc Registration(RegistrationRequest) returns (RegistrationResponse);
+	rpc GetUsers (Dummy) returns (UsersResponse);
+}
+
+
+
+
